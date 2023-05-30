@@ -51,92 +51,26 @@ func main() {
 	}
 	defer ldb.Close()
 
-	{
-		// Generate data
-		n := 10000000 // number of key-value pairs
-		keys, values := generateData(n)
+	// Generate data
+	n := 50000000       // number of key-value pairs
+	batchSize := 200000 // size of each batch
+	keys, values := generateData(n)
 
-		// Test RocksDB batch insert
-		rocksdbDuration := testRocksDBBatchInsert(rdb, keys, values)
-		fmt.Printf("RocksDB batch insert of %d key-value pairs took %v\n", n, rocksdbDuration)
+	// // Test RocksDB batch insert
+	// rocksdbDuration := testRocksDBBatchInsert(rdb, keys, values)
+	// fmt.Printf("RocksDB batch insert of %d key-value pairs took %v\n", n, rocksdbDuration)
 
-		// Test LevelDB batch insert
-		leveldbDuration := testLevelDBBatchInsert(ldb, keys, values)
-		fmt.Printf("LevelDB batch insert of %d key-value pairs took %v\n", n, leveldbDuration)
-	}
+	// // Test RocksDB batch insert with batch size
+	// rocksdbBatchSizeDuration := testRocksDBBatchInsertWithBatchSize(rdb, keys, values, batchSize, n)
+	// fmt.Printf("RocksDB batch insert with batch size of %d for %d key-value pairs took %v\n", batchSize, n, rocksdbBatchSizeDuration)
 
-	return
+	// Test LevelDB batch insert
+	leveldbDuration := testLevelDBBatchInsert(ldb, keys, values)
+	fmt.Printf("LevelDB batch insert of %d key-value pairs took %v\n", n, leveldbDuration)
 
-	{
-		// Create a batch instance
-		batch := NewBatch(rdb)
-
-		// Perform batch insert
-		keys := [][]byte{[]byte("mauro"), []byte("key2"), []byte("key3")}
-		values := [][]byte{[]byte("delazeri"), []byte("value2"), []byte("value3")}
-		for i, key := range keys {
-			if err := batch.Put(key, values[i]); err != nil {
-				fmt.Println("Error putting key-value pair:", err)
-				return
-			}
-		}
-
-		// Write the batch
-		if err := batch.Write(); err != nil {
-			fmt.Println("Error writing batch:", err)
-			return
-		}
-		batch.Reset()
-
-		// Perform batch delete
-		for _, key := range keys {
-			if err := batch.Delete(key); err != nil {
-				fmt.Println("Error deleting key:", err)
-				return
-			}
-		}
-
-		// Write the batch
-		if err := batch.Write(); err != nil {
-			fmt.Println("Error writing batch:", err)
-			return
-		}
-
-		batch.Reset()
-	}
-
-	// Put a key-value pair
-	err = rdb.Put([]byte("key1"), []byte("value1"))
-	if err != nil {
-		log.Fatalf("Failed to put data: %v", err)
-	}
-
-	// Get the value of a key
-	value, err := rdb.Get([]byte("key1"))
-	if err != nil {
-		log.Fatalf("Failed to get data: %v", err)
-	}
-	fmt.Printf("Value of key1: %s\n", value)
-
-	// Check if a key exists
-	has, err := rdb.Has([]byte("key1"))
-	if err != nil {
-		log.Fatalf("Failed to check existence of key: %v", err)
-	}
-	fmt.Printf("Key1 exists: %v\n", has)
-
-	// Delete a key
-	err = rdb.Delete([]byte("key1"))
-	if err != nil {
-		log.Fatalf("Failed to delete key: %v", err)
-	}
-
-	// Check if the key exists after deletion
-	has, err = rdb.Has([]byte("key1"))
-	if err != nil {
-		log.Fatalf("Failed to check existence of key: %v", err)
-	}
-	fmt.Printf("Key1 exists after deletion: %v\n", has)
+	// Test LevelDB batch insert with batch size
+	leveldbBatchSizeDuration := testLevelDBBatchInsertWithBatchSize(ldb, keys, values, batchSize, n)
+	fmt.Printf("LevelDB batch insert with batch size of %d for %d key-value pairs took %v\n", batchSize, n, leveldbBatchSizeDuration)
 }
 
 func Open(path string) (*RocksDB, error) {

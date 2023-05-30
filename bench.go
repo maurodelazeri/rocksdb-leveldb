@@ -49,3 +49,51 @@ func testLevelDBBatchInsert(ldb *leveldb.DB, keys, values [][]byte) time.Duratio
 
 	return time.Since(startTime)
 }
+
+func testRocksDBBatchInsertWithBatchSize(rdb *RocksDB, keys, values [][]byte, batchSize, totalRecords int) time.Duration {
+	startTime := time.Now()
+
+	for i := 0; i < totalRecords; i += batchSize {
+		batch := NewBatch(rdb)
+		end := i + batchSize
+		if end > totalRecords {
+			end = totalRecords
+		}
+
+		for _, key := range keys[i:end] {
+			if err := batch.Put(key, values[i]); err != nil {
+				log.Fatalf("Error putting key-value pair: %v", err)
+			}
+		}
+
+		if err := batch.Write(); err != nil {
+			log.Fatalf("Error writing batch: %v", err)
+		}
+		batch.Reset()
+	}
+
+	return time.Since(startTime)
+}
+
+func testLevelDBBatchInsertWithBatchSize(ldb *leveldb.DB, keys, values [][]byte, batchSize, totalRecords int) time.Duration {
+	startTime := time.Now()
+
+	for i := 0; i < totalRecords; i += batchSize {
+		batch := new(leveldb.Batch)
+		end := i + batchSize
+		if end > totalRecords {
+			end = totalRecords
+		}
+
+		for _, key := range keys[i:end] {
+			batch.Put(key, values[i])
+		}
+
+		if err := ldb.Write(batch, nil); err != nil {
+			log.Fatalf("Error writing batch: %v", err)
+		}
+		batch.Reset()
+	}
+
+	return time.Since(startTime)
+}
