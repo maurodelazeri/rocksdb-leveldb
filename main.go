@@ -61,12 +61,12 @@ func main() {
 	// fmt.Printf("RocksDB batch insert of %d key-value pairs took %v\n", n, rocksdbDuration)
 
 	// // Test RocksDB batch insert with batch size
-	// rocksdbBatchSizeDuration := testRocksDBBatchInsertWithBatchSize(rdb, keys, values, batchSize, n)
-	// fmt.Printf("RocksDB batch insert with batch size of %d for %d key-value pairs took %v\n", batchSize, n, rocksdbBatchSizeDuration)
+	rocksdbBatchSizeDuration := testRocksDBBatchInsertWithBatchSize(rdb, keys, values, batchSize, n)
+	fmt.Printf("RocksDB batch insert with batch size of %d for %d key-value pairs took %v\n", batchSize, n, rocksdbBatchSizeDuration)
 
 	// Test LevelDB batch insert
-	leveldbDuration := testLevelDBBatchInsert(ldb, keys, values)
-	fmt.Printf("LevelDB batch insert of %d key-value pairs took %v\n", n, leveldbDuration)
+	// leveldbDuration := testLevelDBBatchInsert(ldb, keys, values)
+	// fmt.Printf("LevelDB batch insert of %d key-value pairs took %v\n", n, leveldbDuration)
 
 	// Test LevelDB batch insert with batch size
 	leveldbBatchSizeDuration := testLevelDBBatchInsertWithBatchSize(ldb, keys, values, batchSize, n)
